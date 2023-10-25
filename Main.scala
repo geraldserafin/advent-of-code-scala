@@ -19,10 +19,10 @@ def getInputFileLines(path: Path): Either[String, Iterator[String]] = {
   }
 }
 
-def getYear(number: Int): Either[String, Int => Iterator[String] => Either[String, Day[_]]] = {
-  number match {
+def getYear(year: Int): Either[String, Int => Iterator[String] => Either[String, Day[_]]] = {
+  year match {
     case 2020 => Right(`2020`.matchDay)
-    case _    => Left(s"No solutions for year ")
+    case _    => Left(s"No solutions for year $year")
   }
 }
 
@@ -37,38 +37,25 @@ def main(): Opts[Unit] = {
     .option[Int]("day", short = "d", metavar = "day", help = "Day to solve")
     .withDefault(LocalDate.now().getDayOfMonth())
 
-  val part = Opts
-    .option[Int](
-      "part",
-      short   = "p",
-      metavar = "part",
-      help    = "0 - both, 1 - part1, 2 - part2"
-    )
-    .withDefault(0)
-
-  (path, year, day, part).mapN { (pathArg, yearArg, dayArg, partArg) =>
+  (path, year, day).mapN { (pathArg, yearArg, dayArg) =>
     val day = for {
       getDay <- getYear(yearArg)
       input  <- getInputFileLines(pathArg)
       day    <- getDay(dayArg)(input)
     } yield day
 
-    (day, partArg) match {
-      case (Right(day), 0) => {
+    day match {
+      case Left(err)  => println(err)
+      case Right(day) => {
         println(day.part1())
         println(day.part2())
       }
-      case (Right(day), 1) => println(day.part1())
-      case (Right(day), 2) => println(day.part2())
-      case (Right(_), _)   => println("Pick a correct part to solve")
-      case (Left(e), _)    => println(e)
     }
   }
 }
 
-object Main
-    extends CommandApp(
-      name   = "scala-cli run . --",
-      header = "Given a path for input file solves advent of code problem for specified day in a specified year",
-      main   = main()
-    )
+object Main extends CommandApp(
+  name   = "scala-cli run . --",
+  header = "Given a path for input file solves advent of code problem for specified day in a specified year",
+  main   = main()
+)
