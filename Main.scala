@@ -19,13 +19,12 @@ def getInputFileLines(path: Path): Either[String, Iterator[String]] = {
   }
 }
 
-def getYear(
-    number: Int
-): Either[String, Int => Iterator[String] => Either[String, Day[_]]] =
+def getYear(number: Int): Either[String, Int => Iterator[String] => Either[String, Day[_]]] = {
   number match {
     case 2020 => Right(`2020`.matchDay)
     case _    => Left(s"No solutions for year ")
   }
+}
 
 def main(): Opts[Unit] = {
   val path = Opts.argument[Path]("input-file-path");
@@ -41,17 +40,17 @@ def main(): Opts[Unit] = {
   val part = Opts
     .option[Int](
       "part",
-      short = "p",
+      short   = "p",
       metavar = "part",
-      help = "0 - both, 1 - part1, 2 - part2"
+      help    = "0 - both, 1 - part1, 2 - part2"
     )
     .withDefault(0)
 
   (path, year, day, part).mapN { (pathArg, yearArg, dayArg, partArg) =>
     val day = for {
       getDay <- getYear(yearArg)
-      input <- getInputFileLines(pathArg)
-      day <- getDay(dayArg)(input)
+      input  <- getInputFileLines(pathArg)
+      day    <- getDay(dayArg)(input)
     } yield day
 
     (day, partArg) match {
@@ -69,8 +68,7 @@ def main(): Opts[Unit] = {
 
 object Main
     extends CommandApp(
-      name = "scala-cli run . --",
-      header =
-        "Given a path for input file solves advent of code problem for specified day in a specified year",
-      main = main()
+      name   = "scala-cli run . --",
+      header = "Given a path for input file solves advent of code problem for specified day in a specified year",
+      main   = main()
     )
